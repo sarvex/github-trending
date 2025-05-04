@@ -1,0 +1,54 @@
+replicaCount: 2
+
+image:
+  repository: your-dockerhub-username/github-trending
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8000  # Both Dash UI (/) and FastAPI API endpoints are served on this port
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  host: "github-trending.example.com"
+  tls: true
+  tlsSecret: "github-trending-tls"
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+
+nodeSelector:
+  disktype: ssd
+
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "gpu"
+    effect: "NoSchedule"
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - github-trending
+        topologyKey: "kubernetes.io/hostname"
+
+env:
+  - name: OPENAI_API_KEY
+    value: "sk-..."
+  - name: LOG_LEVEL
+    value: "info"

@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+starlette
+requests
+beautifulsoup4
+dash
+dash-cytoscape
+python-dotenv
+aiocache
+pytest
+pytest-mock
